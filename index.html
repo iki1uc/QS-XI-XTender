@@ -1,24 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>QS‑XI‑XTender – Kosmos Kontinuum</title>
+<style>
+    body { margin:0; background:black; }
+    canvas { display:block; }
+</style>
+</head>
+
+<body>
+<canvas id="cv" width="900" height="900"></canvas>
+
 <script type="module">
 
-/* --- Hyperframe (HY) --- */
+/* --- HY (Hyperframe) --- */
 const HY = 0.2;
 
-/* --- Perspective (PE) --- */
-function PE(v){ return { x: v.x*HY, y: v.y*HY }; }
-
-/* --- Perimeter (PER) --- */
-function PER(A,B){ return Math.hypot(A.x-B.x, A.y-B.y); }
-
-/* --- Orbit (TRANS + WARB) --- */
-let tTokio=0, tCorlu=0, tHH=0;
-
-function orbit(r, speed, t){
-    t.value += speed;
-    return { x: Math.cos(t.value)*r, y: Math.sin(t.value)*r };
+/* --- PE (Perspective) --- */
+function PE(v){
+    return { x: v.x * HY, y: v.y * HY };
 }
 
-/* --- AIV (Drift) --- */
-function AIV(v){ return { x: v.x*1.01, y: v.y*1.01 }; }
+/* --- PER (Geometrie) --- */
+function PER(A,B){
+    return Math.hypot(A.x - B.x, A.y - B.y);
+}
+
+/* --- TRANS + WARB Orbit --- */
+let tTokio = 0;
+let tCorlu = 0;
+let tHH    = 0;
+
+function orbitTokio(){
+    tTokio += 0.0004;
+    return { x: Math.cos(tTokio)*2268, y: Math.sin(tTokio)*2268 };
+}
+
+function orbitCorlu(){
+    tCorlu += 0.0008;
+    return { x: Math.cos(tCorlu)*756, y: Math.sin(tCorlu)*756 };
+}
+
+function orbitHH(){
+    tHH += 0.0012;
+    let x = Math.cos(tHH)*243;
+    let y = Math.sin(tHH)*243;
+    return { x: x*1.01, y: y*1.01 }; // WARB Drift
+}
 
 /* --- Dreieck (SYN + QUANDT) --- */
 function triangle(A,B,C){
@@ -36,24 +65,25 @@ const ctx = cv.getContext("2d");
 function loop(){
     ctx.clearRect(0,0,900,900);
 
-    const Tokio = PE(orbit(2268,0.0004,{value:tTokio}));
-    const Corlu = PE(orbit(756,0.0008,{value:tCorlu}));
-    const HH    = PE(AIV(orbit(243,0.0012,{value:tHH})));
+    /* --- Kosmos‑Kontinuum Punkte --- */
+    const Tokio = PE(orbitTokio());
+    const Corlu = PE(orbitCorlu());
+    const HH    = PE(orbitHH());
 
-    /* Dreieck */
-    ctx.strokeStyle="white";
+    /* --- Dreieck zeichnen --- */
+    ctx.strokeStyle = "white";
     ctx.beginPath();
-    ctx.moveTo(450+Tokio.x,450+Tokio.y);
-    ctx.lineTo(450+Corlu.x,450+Corlu.y);
-    ctx.lineTo(450+HH.x,450+HH.y);
+    ctx.moveTo(450+Tokio.x, 450+Tokio.y);
+    ctx.lineTo(450+Corlu.x, 450+Corlu.y);
+    ctx.lineTo(450+HH.x,    450+HH.y);
     ctx.closePath();
     ctx.stroke();
 
-    /* Punkte */
-    ctx.fillStyle="cyan";
-    ctx.fillRect(450+Tokio.x,450+Tokio.y,4,4);
-    ctx.fillRect(450+Corlu.x,450+Corlu.y,4,4);
-    ctx.fillRect(450+HH.x,450+HH.y,4,4);
+    /* --- Punkte --- */
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(450+Tokio.x, 450+Tokio.y, 4, 4);
+    ctx.fillRect(450+Corlu.x, 450+Corlu.y, 4, 4);
+    ctx.fillRect(450+HH.x,    450+HH.y,    4, 4);
 
     requestAnimationFrame(loop);
 }
@@ -61,3 +91,5 @@ function loop(){
 loop();
 
 </script>
+</body>
+</html>
