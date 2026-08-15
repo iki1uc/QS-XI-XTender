@@ -30,6 +30,19 @@ function draw(){
 
     requestAnimationFrame(draw);
 }
+import { Q_CORE_XI } from "./Q/Q_CORE_XI.js";
+import { Q_PLANETS } from "./Q/Q_PLANETS.js";
+
+import { S_OrbitEngine } from "./S/S_OrbitEngine.js";
+
+const CORE = Q_CORE_XI.corePackage();
+const Engine = new S_OrbitEngine(CORE.mass);
+
+const tokio = { name: Q_PLANETS.tokio.name, baseR: Q_PLANETS.tokio.baseR };
+const hh    = { name: Q_PLANETS.hh.name,    baseR: Q_PLANETS.hh.baseR };
+const corlu = { name: Q_PLANETS.corlu.name, baseR: Q_PLANETS.corlu.baseR };
+
+// Orbit-Rendering folgt später
 
 draw();
 </script>
