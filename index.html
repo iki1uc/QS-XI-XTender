@@ -1,37 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>GEO‑3D‑ASCII · RUN8 · iki1uc</title>
-<style>
-body { background:#000; color:#0f0; font-family:Consolas; padding:20px; }
-pre { font-size:16px; line-height:18px; }
-</style>
-</head>
-<body>
+<canvas id="view" width="800" height="800"></canvas>
 
-<h2>GEO‑3D‑ASCII · RUN8</h2>
-<pre id="geo">START…</pre>
+<script type="module">
+import { Q_CORE_XI } from "./Q/Q_CORE_XI.js";
+import { S_OrbitEngine } from "./S/S_OrbitEngine.js";
 
-<script>
-let f = 0;
+import { Corlu } from "./S/Corlu.js";
+import { HH } from "./S/HH.js";
+import { Tokio } from "./S/Tokio.js";
 
-function anim(){
-    f++;
+const CORE = Q_CORE_XI.corePackage();
+const Engine = new S_OrbitEngine(CORE.mass);
 
-    // 3D‑Rotation simuliert durch wechselnde Tiefe
-    const depth = ["●","○","·","∙","•"];
-    const d = (i)=> depth[(f+i)%depth.length];
+const ctx = document.getElementById("view").getContext("2d");
 
-    // Anime‑Glow simuliert durch Funken
-    const glow = (f%2 ? "✦" : "✧");
+function draw(){
+    ctx.clearRect(0,0,800,800);
 
-    // Amiga‑Raster simuliert durch horizontale Balken
-    const raster = (f%3 ? "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓" : "██████████████████");
+    const planets = [
+        Engine.orbit(Corlu),
+        Engine.orbit(HH),
+        Engine.orbit(Tokio)
+    ];
 
-    const geo = `
-GEO‑3D‑ROTATION (frame ${f})
+    planets.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(400 + p.x/5e10, 400 + p.y/5e10, 5, 0, Math.PI*2);
+        ctx.fill();
+    });
 
-X‑Axis  ─── ${d(1)} ${d(2)} ${d(3)}
-Y‑Axis  ─── ${d(2)} ${d(3)} ${d(4)}
-Z‑
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
