@@ -1,104 +1,101 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>QS‑XI‑XTender System</title>
-
-    <style>
-        body {
-            background: black;
-            margin: 0;
-            overflow: hidden;
-        }
-        canvas {
-            background: #000;
-            display: block;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>QS‑XI‑XTender – Kosmos Kontinuum Dreieck</title>
+<style>
+    body { margin:0; background:black; }
+    canvas { display:block; }
+</style>
 </head>
 
 <body>
-    <canvas id="cv" width="900" height="900"></canvas>
+<canvas id="cv" width="900" height="900"></canvas>
 
-    <script type="module">
+<script type="module">
 
-        /* ---------------- CORE ---------------- */
-        import { CORE_CONSTANTS } from "./CORE/CORE_constants.js";
-        import { CORE_MASS } from "./CORE/CORE_mass.js";
-        import { CORE_OP } from "./CORE/CORE_Operator.js";
+/* --- Vektor --- */
+function vec(x,y){ return {x,y}; }
+function add(a,b){ return vec(a.x+b.x, a.y+b.y); }
+function sub(a,b){ return vec(a.x-b.x, a.y-b.y); }
+function mul(a,s){ return vec(a.x*s, a.y*s); }
+function len(a){ return Math.hypot(a.x,a.y); }
 
-        /* ---------------- Q ---------------- */
-        import { PLANETS } from "./Q/Q_PLANETS.js";
+/* --- Orbit (Kosmos‑Kontinuum) --- */
+let tTokio = 0, tCorlu = 0, tHH = 0;
 
-        /* ---------------- R (Realphysik) ---------------- */
-        import { curvature } from "./R/R_curvature.js";
-        import { timeDilation } from "./R/R_timeDilation.js";
-        import { orbitVelocity } from "./R/R_orbitphysics.js";
+function orbit(r, speed, t){
+    t.value += speed;
+    return vec(
+        Math.cos(t.value) * r,
+        Math.sin(t.value) * r
+    );
+}
 
-        /* ---------------- S (Sensoren) ---------------- */
-        import { orbit } from "./S/S_orbitengine.js";
-        import { realMeasure } from "./S/S_realmeasure.js";
-        import { triangle } from "./S/S_triangle.js";
+/* --- Dreieck (Geo‑Physik) --- */
+function triangle(A,B,C){
+    return {
+        AB: len(sub(A,B)),
+        BC: len(sub(B,C)),
+        CA: len(sub(C,A))
+    };
+}
 
-        import { Tokio } from "./S/Tokio.js";
-        import { HH } from "./S/HH.js";
-        import { Corlu } from "./S/Corlu.js";
+/* --- Syn‑Quant‑Axiom (wandernder Punkt) --- */
+let alpha = 0;
+function axiom(A,B){
+    alpha += 0.01;     // Bewegung im Kontinuum
+    if(alpha > 1) alpha = 0;
+    return vec(
+        A.x*(1-alpha) + B.x*alpha,
+        A.y*(1-alpha) + B.y*alpha
+    );
+}
 
-        /* ---------------- G (Golem) ---------------- */
-        import { G_interpret } from "./G/G_interpret.js";
+/* --- Canvas --- */
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
 
-        /* ---------------- Z (Zone) ---------------- */
-        import { inZone } from "./Z/Z_Zone.js";
+let points = [];
 
-        /* ---------------- UI ---------------- */
-        import { drawCircle } from "./UI/UI_Draw.js";
-        import { drawValues } from "./UI/UI_Values.js";
-        import { drawTriangle } from "./UI/UI_Triangle.js";
-        import { drawZone } from "./UI/UI_Zone.js";
+function loop(){
+    ctx.clearRect(0,0,900,900);
 
+    /* --- Kosmos‑Orbits --- */
+    const Tokio = orbit(2268, 0.0004, {value:tTokio});
+    const Corlu = orbit(756, 0.0008, {value:tCorlu});
+    const HH    = orbit(243, 0.0012, {value:tHH});
 
-        /* ---------------- CANVAS ---------------- */
-        const cv = document.getElementById("cv");
-        const ctx = cv.getContext("2d");
+    /* --- Syn‑Quant‑Axiom‑Punkt --- */
+    const Axiom = axiom(Tokio, HH);
+    points.push(Axiom);
 
+    /* --- Dreieck zeichnen --- */
+    ctx.strokeStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(450+Tokio.x/5, 450+Tokio.y/5);
+    ctx.lineTo(450+Corlu.x/5, 450+Corlu.y/5);
+    ctx.lineTo(450+HH.x/5,    450+HH.y/5);
+    ctx.closePath();
+    ctx.stroke();
 
-        /* ---------------- MAIN LOOP ---------------- */
-        function loop(){
+    /* --- Punkte zeichnen --- */
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(450+Tokio.x/5, 450+Tokio.y/5, 4, 4);
+    ctx.fillRect(450+Corlu.x/5, 450+Corlu.y/5, 4, 4);
+    ctx.fillRect(450+HH.x/5,    450+HH.y/5,    4, 4);
 
-            ctx.clearRect(0,0,900,900);
+    /* --- Axiom‑Spur --- */
+    ctx.fillStyle = "yellow";
+    points.forEach(p => {
+        ctx.fillRect(450+p.x/5, 450+p.y/5, 2, 2);
+    });
 
-            /* --- Orbit Positionen --- */
-            const P_tokio = orbit(Tokio);
-            const P_hh    = orbit(HH);
-            const P_corlu = orbit(Corlu);
+    requestAnimationFrame(loop);
+}
 
-            /* --- Realwerte für HH (Sensorpunkt) --- */
-            const real = realMeasure(CORE_MASS.real_blackhole, HH.r);
+loop();
 
-            /* --- Golemwerte --- */
-            const golem = G_interpret(real);
-
-            /* --- Zeichnen --- */
-            drawCircle(ctx, 450 + P_tokio.x/10, 450 + P_tokio.y/10, 5);
-            drawCircle(ctx, 450 + P_hh.x/10,    450 + P_hh.y/10,    5);
-            drawCircle(ctx, 450 + P_corlu.x/10, 450 + P_corlu.y/10, 5);
-
-            drawValues(ctx, real, golem);
-
-            drawTriangle(
-                ctx,
-                { x: 450 + P_tokio.x/10, y: 450 + P_tokio.y/10 },
-                { x: 450 + P_hh.x/10,    y: 450 + P_hh.y/10 },
-                { x: 450 + P_corlu.x/10, y: 450 + P_corlu.y/10 }
-            );
-
-            drawZone(ctx);
-
-            requestAnimationFrame(loop);
-        }
-
-        loop();
-
-    </script>
+</script>
 </body>
 </html>
