@@ -1,27 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QS-XI-XTender · System</title>
+    <meta charset="UTF-8">
+    <style>
+        body { background:black; color:white; font-family:Arial; }
+        canvas { background:#111; display:block; margin:20px auto; }
+    </style>
+</head>
+
+<body>
+
+<h1 style="text-align:center;">QS‑XI‑XTender · Orbit System</h1>
+
 <canvas id="view" width="800" height="800"></canvas>
 
 <script type="module">
+
+/* --- Q-SYSTEM --- */
 import { Q_CORE_XI } from "./Q/Q_CORE_XI.js";
+import { Q_PLANETS } from "./Q/Q_PLANETS.js";
+
+/* --- S-SYSTEM --- */
 import { S_OrbitEngine } from "./S/S_OrbitEngine.js";
 
-import { Corlu } from "./S/Corlu.js";
-import { HH } from "./S/HH.js";
-import { Tokio } from "./S/Tokio.js";
-
+/* --- CORE INITIALISIEREN --- */
 const CORE = Q_CORE_XI.corePackage();
 const Engine = new S_OrbitEngine(CORE.mass);
 
+/* --- PLANETEN AUS Q-DATEN ERZEUGEN --- */
+const tokio = { name: Q_PLANETS.tokio.name, baseR: Q_PLANETS.tokio.baseR };
+const hh    = { name: Q_PLANETS.hh.name,    baseR: Q_PLANETS.hh.baseR };
+const corlu = { name: Q_PLANETS.corlu.name, baseR: Q_PLANETS.corlu.baseR };
+
+/* --- CANVAS --- */
 const ctx = document.getElementById("view").getContext("2d");
 
+/* --- RENDER LOOP --- */
 function draw(){
     ctx.clearRect(0,0,800,800);
 
+    // CORE XI
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(400,400,10,0,Math.PI*2);
+    ctx.fill();
+
+    // PLANETEN
     const planets = [
-        Engine.orbit(Corlu),
-        Engine.orbit(HH),
-        Engine.orbit(Tokio)
+        Engine.orbit(tokio),
+        Engine.orbit(hh),
+        Engine.orbit(corlu)
     ];
 
+    ctx.fillStyle = "white";
     planets.forEach(p => {
         ctx.beginPath();
         ctx.arc(400 + p.x/5e10, 400 + p.y/5e10, 5, 0, Math.PI*2);
@@ -30,19 +62,10 @@ function draw(){
 
     requestAnimationFrame(draw);
 }
-import { Q_CORE_XI } from "./Q/Q_CORE_XI.js";
-import { Q_PLANETS } from "./Q/Q_PLANETS.js";
-
-import { S_OrbitEngine } from "./S/S_OrbitEngine.js";
-
-const CORE = Q_CORE_XI.corePackage();
-const Engine = new S_OrbitEngine(CORE.mass);
-
-const tokio = { name: Q_PLANETS.tokio.name, baseR: Q_PLANETS.tokio.baseR };
-const hh    = { name: Q_PLANETS.hh.name,    baseR: Q_PLANETS.hh.baseR };
-const corlu = { name: Q_PLANETS.corlu.name, baseR: Q_PLANETS.corlu.baseR };
-
-// Orbit-Rendering folgt später
 
 draw();
+
 </script>
+
+</body>
+</html>
