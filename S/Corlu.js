@@ -1,5 +1,1 @@
-export const Corlu = {
-    name: "Corlu-IX",
-    baseR: 3.11
-};
-
+export const Corlu = { r: 756 };
