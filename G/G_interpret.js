@@ -7,4 +7,3 @@ export function G_interpret(real){
         timedilation: G_transform(real.timedilation)
     };
 }
-
