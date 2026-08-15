@@ -1,4 +1,1 @@
-export const tokio = {
-    name: "tokio-IX",
-    baseR: 9.33
-};
+export const Tokio = { r: 2268 };
