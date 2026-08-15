@@ -1,95 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>QS‑XI‑XTender – Kosmos Kontinuum Dreieck</title>
-<style>
-    body { margin:0; background:black; }
-    canvas { display:block; }
-</style>
-</head>
-
-<body>
-<canvas id="cv" width="900" height="900"></canvas>
-
 <script type="module">
 
-/* --- Vektor --- */
-function vec(x,y){ return {x,y}; }
-function add(a,b){ return vec(a.x+b.x, a.y+b.y); }
-function sub(a,b){ return vec(a.x-b.x, a.y-b.y); }
-function mul(a,s){ return vec(a.x*s, a.y*s); }
-function len(a){ return Math.hypot(a.x,a.y); }
+/* --- Hyperframe (HY) --- */
+const HY = 0.2;
 
-/* --- Orbit (Kosmos‑Kontinuum) --- */
-let tTokio = 0, tCorlu = 0, tHH = 0;
+/* --- Perspective (PE) --- */
+function PE(v){ return { x: v.x*HY, y: v.y*HY }; }
+
+/* --- Perimeter (PER) --- */
+function PER(A,B){ return Math.hypot(A.x-B.x, A.y-B.y); }
+
+/* --- Orbit (TRANS + WARB) --- */
+let tTokio=0, tCorlu=0, tHH=0;
 
 function orbit(r, speed, t){
     t.value += speed;
-    return vec(
-        Math.cos(t.value) * r,
-        Math.sin(t.value) * r
-    );
+    return { x: Math.cos(t.value)*r, y: Math.sin(t.value)*r };
 }
 
-/* --- Dreieck (Geo‑Physik) --- */
+/* --- AIV (Drift) --- */
+function AIV(v){ return { x: v.x*1.01, y: v.y*1.01 }; }
+
+/* --- Dreieck (SYN + QUANDT) --- */
 function triangle(A,B,C){
     return {
-        AB: len(sub(A,B)),
-        BC: len(sub(B,C)),
-        CA: len(sub(C,A))
+        AB: PER(A,B),
+        BC: PER(B,C),
+        CA: PER(C,A)
     };
-}
-
-/* --- Syn‑Quant‑Axiom (wandernder Punkt) --- */
-let alpha = 0;
-function axiom(A,B){
-    alpha += 0.01;     // Bewegung im Kontinuum
-    if(alpha > 1) alpha = 0;
-    return vec(
-        A.x*(1-alpha) + B.x*alpha,
-        A.y*(1-alpha) + B.y*alpha
-    );
 }
 
 /* --- Canvas --- */
 const cv = document.getElementById("cv");
 const ctx = cv.getContext("2d");
 
-let points = [];
-
 function loop(){
     ctx.clearRect(0,0,900,900);
 
-    /* --- Kosmos‑Orbits --- */
-    const Tokio = orbit(2268, 0.0004, {value:tTokio});
-    const Corlu = orbit(756, 0.0008, {value:tCorlu});
-    const HH    = orbit(243, 0.0012, {value:tHH});
+    const Tokio = PE(orbit(2268,0.0004,{value:tTokio}));
+    const Corlu = PE(orbit(756,0.0008,{value:tCorlu}));
+    const HH    = PE(AIV(orbit(243,0.0012,{value:tHH})));
 
-    /* --- Syn‑Quant‑Axiom‑Punkt --- */
-    const Axiom = axiom(Tokio, HH);
-    points.push(Axiom);
-
-    /* --- Dreieck zeichnen --- */
-    ctx.strokeStyle = "white";
+    /* Dreieck */
+    ctx.strokeStyle="white";
     ctx.beginPath();
-    ctx.moveTo(450+Tokio.x/5, 450+Tokio.y/5);
-    ctx.lineTo(450+Corlu.x/5, 450+Corlu.y/5);
-    ctx.lineTo(450+HH.x/5,    450+HH.y/5);
+    ctx.moveTo(450+Tokio.x,450+Tokio.y);
+    ctx.lineTo(450+Corlu.x,450+Corlu.y);
+    ctx.lineTo(450+HH.x,450+HH.y);
     ctx.closePath();
     ctx.stroke();
 
-    /* --- Punkte zeichnen --- */
-    ctx.fillStyle = "cyan";
-    ctx.fillRect(450+Tokio.x/5, 450+Tokio.y/5, 4, 4);
-    ctx.fillRect(450+Corlu.x/5, 450+Corlu.y/5, 4, 4);
-    ctx.fillRect(450+HH.x/5,    450+HH.y/5,    4, 4);
-
-    /* --- Axiom‑Spur --- */
-    ctx.fillStyle = "yellow";
-    points.forEach(p => {
-        ctx.fillRect(450+p.x/5, 450+p.y/5, 2, 2);
-    });
+    /* Punkte */
+    ctx.fillStyle="cyan";
+    ctx.fillRect(450+Tokio.x,450+Tokio.y,4,4);
+    ctx.fillRect(450+Corlu.x,450+Corlu.y,4,4);
+    ctx.fillRect(450+HH.x,450+HH.y,4,4);
 
     requestAnimationFrame(loop);
 }
@@ -97,5 +61,3 @@ function loop(){
 loop();
 
 </script>
-</body>
-</html>
