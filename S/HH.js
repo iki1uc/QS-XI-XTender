@@ -1,5 +1,1 @@
-export const HH = {
-    name: "HH-IX",
-    baseR: 1
-};
-
+export const HH = { r: 243 };
