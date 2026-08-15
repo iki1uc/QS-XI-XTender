@@ -3,4 +3,3 @@ export const CORE_CONSTANTS = {
     c: 299792458,
     pi: Math.PI
 };
-
