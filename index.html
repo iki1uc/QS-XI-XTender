@@ -1,71 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>QS-XI-XTender · System</title>
     <meta charset="UTF-8">
+    <title>QS‑XI‑XTender System</title>
+
     <style>
-        body { background:black; color:white; font-family:Arial; }
-        canvas { background:#111; display:block; margin:20px auto; }
+        body {
+            background: black;
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            background: #000;
+            display: block;
+        }
     </style>
 </head>
 
 <body>
+    <canvas id="cv" width="900" height="900"></canvas>
 
-<h1 style="text-align:center;">QS‑XI‑XTender · Orbit System</h1>
+    <script type="module">
 
-<canvas id="view" width="800" height="800"></canvas>
+        /* ---------------- CORE ---------------- */
+        import { CORE_CONSTANTS } from "./CORE/CORE_constants.js";
+        import { CORE_MASS } from "./CORE/CORE_mass.js";
+        import { CORE_OP } from "./CORE/CORE_Operator.js";
 
-<script type="module">
+        /* ---------------- Q ---------------- */
+        import { PLANETS } from "./Q/Q_PLANETS.js";
 
-/* --- Q-SYSTEM --- */
-import { Q_CORE_XI } from "./Q/Q_CORE_XI.js";
-import { Q_PLANETS } from "./Q/Q_PLANETS.js";
+        /* ---------------- R (Realphysik) ---------------- */
+        import { curvature } from "./R/R_curvature.js";
+        import { timeDilation } from "./R/R_timeDilation.js";
+        import { orbitVelocity } from "./R/R_orbitphysics.js";
 
-/* --- S-SYSTEM --- */
-import { S_OrbitEngine } from "./S/S_OrbitEngine.js";
+        /* ---------------- S (Sensoren) ---------------- */
+        import { orbit } from "./S/S_orbitengine.js";
+        import { realMeasure } from "./S/S_realmeasure.js";
+        import { triangle } from "./S/S_triangle.js";
 
-/* --- CORE INITIALISIEREN --- */
-const CORE = Q_CORE_XI.corePackage();
-const Engine = new S_OrbitEngine(CORE.mass);
+        import { Tokio } from "./S/Tokio.js";
+        import { HH } from "./S/HH.js";
+        import { Corlu } from "./S/Corlu.js";
 
-/* --- PLANETEN AUS Q-DATEN ERZEUGEN --- */
-const tokio = { name: Q_PLANETS.tokio.name, baseR: Q_PLANETS.tokio.baseR };
-const hh    = { name: Q_PLANETS.hh.name,    baseR: Q_PLANETS.hh.baseR };
-const corlu = { name: Q_PLANETS.corlu.name, baseR: Q_PLANETS.corlu.baseR };
+        /* ---------------- G (Golem) ---------------- */
+        import { G_interpret } from "./G/G_interpret.js";
 
-/* --- CANVAS --- */
-const ctx = document.getElementById("view").getContext("2d");
+        /* ---------------- Z (Zone) ---------------- */
+        import { inZone } from "./Z/Z_Zone.js";
 
-/* --- RENDER LOOP --- */
-function draw(){
-    ctx.clearRect(0,0,800,800);
+        /* ---------------- UI ---------------- */
+        import { drawCircle } from "./UI/UI_Draw.js";
+        import { drawValues } from "./UI/UI_Values.js";
+        import { drawTriangle } from "./UI/UI_Triangle.js";
+        import { drawZone } from "./UI/UI_Zone.js";
 
-    // CORE XI
-    ctx.fillStyle = "red";
-    ctx.beginPath();
-    ctx.arc(400,400,10,0,Math.PI*2);
-    ctx.fill();
 
-    // PLANETEN
-    const planets = [
-        Engine.orbit(tokio),
-        Engine.orbit(hh),
-        Engine.orbit(corlu)
-    ];
+        /* ---------------- CANVAS ---------------- */
+        const cv = document.getElementById("cv");
+        const ctx = cv.getContext("2d");
 
-    ctx.fillStyle = "white";
-    planets.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(400 + p.x/5e10, 400 + p.y/5e10, 5, 0, Math.PI*2);
-        ctx.fill();
-    });
 
-    requestAnimationFrame(draw);
-}
+        /* ---------------- MAIN LOOP ---------------- */
+        function loop(){
 
-draw();
+            ctx.clearRect(0,0,900,900);
 
-</script>
+            /* --- Orbit Positionen --- */
+            const P_tokio = orbit(Tokio);
+            const P_hh    = orbit(HH);
+            const P_corlu = orbit(Corlu);
 
+            /* --- Realwerte für HH (Sensorpunkt) --- */
+            const real = realMeasure(CORE_MASS.real_blackhole, HH.r);
+
+            /* --- Golemwerte --- */
+            const golem = G_interpret(real);
+
+            /* --- Zeichnen --- */
+            drawCircle(ctx, 450 + P_tokio.x/10, 450 + P_tokio.y/10, 5);
+            drawCircle(ctx, 450 + P_hh.x/10,    450 + P_hh.y/10,    5);
+            drawCircle(ctx, 450 + P_corlu.x/10, 450 + P_corlu.y/10, 5);
+
+            drawValues(ctx, real, golem);
+
+            drawTriangle(
+                ctx,
+                { x: 450 + P_tokio.x/10, y: 450 + P_tokio.y/10 },
+                { x: 450 + P_hh.x/10,    y: 450 + P_hh.y/10 },
+                { x: 450 + P_corlu.x/10, y: 450 + P_corlu.y/10 }
+            );
+
+            drawZone(ctx);
+
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+    </script>
 </body>
 </html>
