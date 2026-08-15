@@ -1,10 +1,4 @@
-export const EVO = {
-    core: "QXI-CORE",
-    orbit: "QXI-ORB",
-    planets: {
-        corlu: "QXI-PL-IX",
-        hh: "QXI-PL-XI",
-        tokio: "QXI-PL-X4"
-    }
+export const Q_ID_EVO = {
+    evoLevel: 1,
+    evolve(x){ return x * 1.01; }
 };
-
