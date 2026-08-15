@@ -1,4 +1,3 @@
-export function inZone(p){
-    return (p.x > -200 && p.x < 200);
+export function zoneEntry(p){
+    return inZone(p) ? true : false;
 }
-
