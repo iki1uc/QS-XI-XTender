@@ -1,0 +1,12 @@
+CONST_90 = {
+  axis: {
+    X: cos(theta),
+    Y: sin(theta),
+    Z: sin(1.3 * theta)
+  },
+  source: "XTender_OrbitEngine",
+  field: 540,        // 3 × 180°
+  layers: [3, 9, 27], // 3^n
+  respo: (SYN + QUANT) / φ,
+  balance: φ⁻¹
+}
