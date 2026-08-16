@@ -1,0 +1,8 @@
+ach.syn = {
+  X: cos(theta),
+  Y: sin(theta),
+  angle: 90,        // konstante Stellung
+  field: 540,       // kompatibel mit CONST_90
+  layer: 3,         // erste Schicht aus 3^n
+  respoWeight: 1/φ  // SYN-Anteil in RESPO
+}
