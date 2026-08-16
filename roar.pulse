@@ -6,7 +6,7 @@ CONST_90 = {
   },
   source: "XTender_OrbitEngine",
   field: 540,        // 3 × 180°
-  layers: [3, 9, 27],
+  layers: [3, 9, 27], // 3^n
   respo: (SYN + QUANT) / φ,
   balance: φ⁻¹
 }
