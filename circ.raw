@@ -1,0 +1,3 @@
+ach.syn     = { X: 0, Y: 1, angle: 90 }
+CONTINIUM   = 0.728
+roar.pulse  = false
