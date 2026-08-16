@@ -2,94 +2,837 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>QS‑XI‑XTender – Kosmos Kontinuum</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONTINIUM · LETZTE · VORLETZTE · 67% GARANTIE</title>
+
 <style>
-    body { margin:0; background:black; }
-    canvas { display:block; }
+:root {
+    --bg: #0a0a12;
+    --fg: #0f0;
+    --syn: #ff6b6b;
+    --quant: #6b6bff;
+    --respo: #ffd93d;
+    --gold: #ffd700;
+    --ok: #4f4;
+    --warn: #ff4;
+    --err: #f44;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Consolas', monospace;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 6px;
+    padding: 10px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+header h1 {
+    font-size: 16px;
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold);
+    letter-spacing: 2px;
+}
+header h1 .syn { color: var(--syn); }
+header h1 .quant { color: var(--quant); }
+header h1 .respo { color: var(--respo); }
+#info-bar { font-size: 10px; color: #666; display: flex; gap: 10px; align-items: center; }
+
+main {
+    display: grid;
+    grid-template-columns: 3fr 1.2fr;
+    gap: 8px;
+    height: 100%;
+    min-height: 0;
+}
+
+#canvas-wrap {
+    background: #0a0a0f;
+    border: 1px solid #1a1a2a;
+    border-radius: 12px;
+    padding: 6px;
+    position: relative;
+    overflow: hidden;
+}
+#canvas-wrap canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    display: block;
+}
+
+#panel {
+    background: #0a0a0f;
+    border: 1px solid #1a1a2a;
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    max-height: 100%;
+}
+#panel h3 { font-size: 10px; color: #666; border-bottom: 1px solid #1a1a2a; padding-bottom: 4px; }
+
+#log {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 8px;
+    color: #6a6a8a;
+    line-height: 1.4;
+    min-height: 50px;
+    max-height: 120px;
+    background: #06060a;
+    border-radius: 4px;
+    padding: 3px 5px;
+}
+#log .entry { padding: 1px 0; border-bottom: 1px solid #0a0a12; }
+#log .time { color: #444; }
+#log .msg.syn { color: var(--syn); }
+#log .msg.quant { color: var(--quant); }
+#log .msg.respo { color: var(--respo); }
+#log .msg.ok { color: var(--ok); }
+#log .msg.warn { color: var(--warn); }
+#log .msg.err { color: var(--err); }
+
+#metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 3px;
+    font-size: 8px;
+}
+.metric {
+    background: #0e0e1a;
+    border-radius: 4px;
+    padding: 4px 6px;
+    text-align: center;
+    border: 1px solid #1a1a2a;
+}
+.metric .label { color: #666; font-size: 7px; text-transform: uppercase; }
+.metric .value { font-size: 12px; font-weight: bold; }
+.metric.syn .value { color: var(--syn); }
+.metric.quant .value { color: var(--quant); }
+.metric.respo .value { color: var(--respo); }
+.metric.garantie .value { color: var(--gold); }
+
+#controls {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+button {
+    background: #111;
+    color: var(--fg);
+    border: 1px solid #333;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 9px;
+    transition: all 0.2s;
+}
+button:hover { background: #1a1a2a; border-color: var(--gold); }
+button:active { transform: scale(0.95); }
+button.primary { border-color: var(--gold); color: var(--gold); }
+button.primary:hover { background: var(--gold); color: #000; }
+button.syn { border-color: var(--syn); color: var(--syn); }
+button.syn:hover { background: var(--syn); color: #000; }
+button.quant { border-color: var(--quant); color: var(--quant); }
+button.quant:hover { background: var(--quant); color: #000; }
+button.respo { border-color: var(--respo); color: var(--respo); }
+button.respo:hover { background: var(--respo); color: #000; }
+button.danger { border-color: var(--err); color: var(--err); }
+button.danger:hover { background: var(--err); color: #000; }
+
+/* VERSIONS-ANZEIGE */
+.version-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    font-size: 8px;
+}
+.version {
+    background: #0a0a12;
+    border-radius: 4px;
+    padding: 4px 6px;
+    text-align: center;
+    border: 1px solid #1a1a2a;
+}
+.version .name { font-weight: bold; }
+.version .status { font-size: 9px; }
+.version .status.ok { color: var(--ok); }
+.version .status.warn { color: var(--warn); }
+.version .status.err { color: var(--err); }
+.version .ver { color: #666; font-size: 7px; }
+
+#garantie-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 8px;
+    color: #666;
+}
+#garantie-bar .bar {
+    flex: 1;
+    height: 6px;
+    background: #1a1a2a;
+    border-radius: 3px;
+    overflow: hidden;
+}
+#garantie-bar .bar .fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+#garantie-bar .bar .fill.ok { background: var(--ok); }
+#garantie-bar .bar .fill.warn { background: var(--warn); }
+#garantie-bar .bar .fill.err { background: var(--err); }
+
+@media (max-width: 800px) {
+    main { grid-template-columns: 1fr; }
+    #panel { max-height: 250px; }
+    .version-box { grid-template-columns: 1fr; }
+}
 </style>
 </head>
-
 <body>
-<canvas id="cv" width="900" height="900"></canvas>
 
-<script type="module">
+<header>
+    <h1>
+        <span class="syn">⟳ SYN</span>
+        <span style="color:#666;">·</span>
+        <span class="quant">⚛ QUANT</span>
+        <span style="color:#666;">·</span>
+        <span class="respo">◈ RESPO</span>
+        <span style="color:#666;">·</span>
+        <span style="color:var(--gold);">67% GARANTIE</span>
+    </h1>
+    <div id="info-bar">
+        <span id="clock">⏱️ --:--:--</span>
+        <span id="state-display" style="color:var(--gold);">● bereit</span>
+        <span id="cycle-display" style="color:#666;">Zyklus 0</span>
+    </div>
+</header>
 
-/* --- HY (Hyperframe) --- */
-const HY = 0.2;
+<main>
+    <div id="canvas-wrap">
+        <canvas id="continCanvas"></canvas>
+    </div>
 
-/* --- PE (Perspective) --- */
-function PE(v){
-    return { x: v.x * HY, y: v.y * HY };
+    <div id="panel">
+        <h3>📊 LETZTE · VORLETZTE · GARANTIE</h3>
+
+        <div id="metrics">
+            <div class="metric syn">
+                <div class="label">⟳ SYN (Letzte)</div>
+                <div class="value" id="syn-value">0.00</div>
+            </div>
+            <div class="metric quant">
+                <div class="label">⚛ QUANT (Vorletzte)</div>
+                <div class="value" id="quant-value">0.00</div>
+            </div>
+            <div class="metric respo">
+                <div class="label">◈ RESPO</div>
+                <div class="value" id="respo-value">0.00</div>
+            </div>
+            <div class="metric garantie">
+                <div class="label">🛡 GARANTIE</div>
+                <div class="value" id="garantie-value">67%</div>
+            </div>
+        </div>
+
+        <!-- VERSIONS-ANZEIGE -->
+        <div class="version-box">
+            <div class="version" id="syn-version">
+                <div class="name" style="color:var(--syn);">⟳ SYN</div>
+                <div class="ver">Version: <span id="syn-ver">1.2.3</span></div>
+                <div class="status ok" id="syn-status">✅ Letzte · 87%</div>
+            </div>
+            <div class="version" id="quant-version">
+                <div class="name" style="color:var(--quant);">⚛ QUANT</div>
+                <div class="ver">Version: <span id="quant-ver">1.2.2</span></div>
+                <div class="status ok" id="quant-status">✅ Vorletzte · 83%</div>
+            </div>
+        </div>
+
+        <!-- GARANTIE-BAR -->
+        <div id="garantie-bar">
+            <span>67%</span>
+            <div class="bar">
+                <div class="fill ok" id="garantie-fill" style="width:67%;"></div>
+            </div>
+            <span id="garantie-label">✅ Garantie erfüllt</span>
+        </div>
+
+        <div id="log">
+            <div class="entry"><span class="time">[INIT]</span> <span class="msg respo">◈ CONTINIUM · 67% Garantie geladen</span></div>
+            <div class="entry"><span class="time">[INIT]</span> <span class="msg syn">⟳ SYN = Letzte Version (experimentell)</span></div>
+            <div class="entry"><span class="time">[INIT]</span> <span class="msg quant">⚛ QUANT = Vorletzte Version (stabil)</span></div>
+            <div class="entry"><span class="time">[INIT]</span> <span class="msg ok">✅ Garantie: >67% Funktionalität</span></div>
+        </div>
+
+        <div id="controls">
+            <button class="primary" id="btn-start">▶ START</button>
+            <button class="syn" id="btn-syn">⟳ SYN</button>
+            <button class="quant" id="btn-quant">⚛ QUANT</button>
+            <button class="respo" id="btn-respo">◈ RESPO</button>
+            <button class="danger" id="btn-reset">⟲ RESET</button>
+            <button id="btn-auto">▶ AUTO</button>
+        </div>
+    </div>
+</main>
+
+<script>
+// ============================================================
+// 1. KONSTANTEN
+// ============================================================
+const PHI = 1.61803398875;
+const DEG_90 = Math.PI / 2;
+const DEG_120 = (2 * Math.PI) / 3;
+const DEG_180 = Math.PI;
+const GARANTIE_SCHWELLE = 0.67;
+
+// ============================================================
+// 2. CANVAS SETUP
+// ============================================================
+const canvas = document.getElementById('continCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, cx, cy, radius;
+
+function resizeCanvas() {
+    const wrap = document.getElementById('canvas-wrap');
+    const rect = wrap.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    W = canvas.width; H = canvas.height;
+    cx = W / 2; cy = H / 2;
+    radius = Math.min(W, H) * 0.38;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// ============================================================
+// 3. STATE — LETZTE vs. VORLETZTE
+// ============================================================
+const state = {
+    running: false,
+    paused: false,
+    autoMode: false,
+    cycle: 0,
+    t: 0,
+
+    // SYN = Letzte Version (experimentell, mehr Risiko)
+    synValue: 0.5,
+    synVersion: '1.2.3',
+    synStability: 0.87, // 87% stabil
+    synAngle: 0,
+
+    // QUANT = Vorletzte Version (stabil, bewährt)
+    quantValue: 0.5,
+    quantVersion: '1.2.2',
+    quantStability: 0.83, // 83% stabil
+    quantAngle: 0,
+
+    respoValue: 0.5,
+
+    // Garantie
+    garantie: GARANTIE_SCHWELLE,
+    garantieErfuellt: true,
+
+    // Orbits
+    orbits: { tokio: 0, corlu: 0, hh: 0 },
+    synPoints: [],
+    quantPoints: []
+};
+
+// ============================================================
+// 4. LOG
+// ============================================================
+function log(msg, type = 'info') {
+    const logDiv = document.getElementById('log');
+    const entry = document.createElement('div');
+    entry.className = 'entry';
+    const time = new Date().toLocaleTimeString();
+    const cls = type === 'ok' ? 'ok' : type === 'err' ? 'err' : type === 'warn' ? 'warn' :
+                type === 'syn' ? 'syn' : type === 'quant' ? 'quant' : type === 'respo' ? 'respo' : '';
+    entry.innerHTML = `<span class="time">[${time}]</span> <span class="msg ${cls}">${msg}</span>`;
+    logDiv.appendChild(entry);
+    logDiv.scrollTop = logDiv.scrollHeight;
+    while (logDiv.children.length > 100) logDiv.removeChild(logDiv.firstChild);
 }
 
-/* --- PER (Geometrie) --- */
-function PER(A,B){
-    return Math.hypot(A.x - B.x, A.y - B.y);
+// ============================================================
+// 5. KERN-FUNKTIONEN
+// ============================================================
+function computeSyn(angle, strength) {
+    strength = strength || 1;
+    const angles = [angle, angle + DEG_90, angle + DEG_180, angle + DEG_90 * 3];
+    return angles.map(a => ({
+        angle: a,
+        x: Math.cos(a) * radius * 0.8 * strength,
+        y: Math.sin(a) * radius * 0.8 * strength,
+        weight: Math.sin(a + state.t) * 0.5 + 0.5
+    }));
 }
 
-/* --- TRANS + WARB Orbit --- */
-let tTokio = 0;
-let tCorlu = 0;
-let tHH    = 0;
-
-function orbitTokio(){
-    tTokio += 0.0004;
-    return { x: Math.cos(tTokio)*2268, y: Math.sin(tTokio)*2268 };
+function computeQuant(angle, strength) {
+    strength = strength || 1;
+    const angles = [angle, angle + DEG_120, angle + DEG_120 * 2];
+    return angles.map(a => ({
+        angle: a,
+        x: Math.cos(a) * radius * 0.7 * strength,
+        y: Math.sin(a) * radius * 0.7 * strength,
+        weight: Math.cos(a + state.t * 0.7) * 0.5 + 0.5
+    }));
 }
 
-function orbitCorlu(){
-    tCorlu += 0.0008;
-    return { x: Math.cos(tCorlu)*756, y: Math.sin(tCorlu)*756 };
+function computeRespo(synVal, quantVal, synStab, quantStab) {
+    // Gewichtung: Stabilität bestimmt, wie viel Einfluss die Version hat
+    const synWeight = synStab / (synStab + quantStab);
+    const quantWeight = quantStab / (synStab + quantStab);
+    const weighted = (synVal * synWeight + quantVal * quantWeight);
+    return Math.min(1, Math.max(0, weighted / PHI * 1.618));
 }
 
-function orbitHH(){
-    tHH += 0.0012;
-    let x = Math.cos(tHH)*243;
-    let y = Math.sin(tHH)*243;
-    return { x: x*1.01, y: y*1.01 }; // WARB Drift
+function computeGarantie(synStab, quantStab) {
+    // Garantie ist der Durchschnitt der Stabilitäten
+    return (synStab + quantStab) / 2;
 }
 
-/* --- Dreieck (SYN + QUANDT) --- */
-function triangle(A,B,C){
-    return {
-        AB: PER(A,B),
-        BC: PER(B,C),
-        CA: PER(C,A)
-    };
+// ============================================================
+// 6. RENDER
+// ============================================================
+function render() {
+    if (state.paused) {
+        requestAnimationFrame(render);
+        return;
+    }
+
+    ctx.clearRect(0, 0, W, H);
+
+    drawGrid();
+    drawOrbits();
+    drawSynNetwork();
+    drawQuantNetwork();
+    drawRespoCore();
+    drawGarantieLine();
+
+    // Metriken
+    document.getElementById('syn-value').textContent = state.synValue.toFixed(3);
+    document.getElementById('quant-value').textContent = state.quantValue.toFixed(3);
+    document.getElementById('respo-value').textContent = state.respoValue.toFixed(3);
+
+    const garantiePct = Math.round(state.garantie * 100);
+    document.getElementById('garantie-value').textContent = garantiePct + '%';
+
+    // Garantie-Bar
+    const fill = document.getElementById('garantie-fill');
+    fill.style.width = Math.min(100, garantiePct) + '%';
+    fill.className = 'fill ' + (state.garantie >= GARANTIE_SCHWELLE ? 'ok' : 'err');
+    document.getElementById('garantie-label').textContent =
+        state.garantie >= GARANTIE_SCHWELLE ? '✅ Garantie erfüllt' : '❌ Garantie NICHT erfüllt!';
+
+    // Version-Status
+    const synStatus = document.getElementById('syn-status');
+    synStatus.textContent = `✅ Letzte · ${Math.round(state.synStability * 100)}%`;
+    synStatus.className = 'status ' + (state.synStability >= GARANTIE_SCHWELLE ? 'ok' : 'warn');
+
+    const quantStatus = document.getElementById('quant-status');
+    quantStatus.textContent = `✅ Vorletzte · ${Math.round(state.quantStability * 100)}%`;
+    quantStatus.className = 'status ' + (state.quantStability >= GARANTIE_SCHWELLE ? 'ok' : 'warn');
+
+    // Updates
+    state.t += 0.008;
+    if (state.running) {
+        state.synAngle += 0.005 * (1 + (1 - state.synStability) * 0.5);
+        state.quantAngle += 0.005 * (1 + (1 - state.quantStability) * 0.3);
+        state.orbits.tokio += 0.002;
+        state.orbits.corlu += 0.003;
+        state.orbits.hh += 0.005;
+    }
+
+    requestAnimationFrame(render);
+}
+render();
+
+// ============================================================
+// 7. ZEICHEN-FUNKTIONEN
+// ============================================================
+function drawGrid() {
+    const sizes = [3, 9, 27];
+    const colors = ['#0ff3', '#f0f3', '#ff03'];
+    sizes.forEach((size, idx) => {
+        const spacing = radius * 0.06 * (27 / size);
+        const offset = (size - 1) * spacing / 2;
+        ctx.strokeStyle = colors[idx];
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < size; i++) {
+            const pos = -offset + i * spacing;
+            ctx.beginPath();
+            ctx.moveTo(cx + pos, cy - offset);
+            ctx.lineTo(cx + pos, cy + offset);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(cx - offset, cy + pos);
+            ctx.lineTo(cx + offset, cy + pos);
+            ctx.stroke();
+        }
+    });
 }
 
-/* --- Canvas --- */
-const cv = document.getElementById("cv");
-const ctx = cv.getContext("2d");
-
-function loop(){
-    ctx.clearRect(0,0,900,900);
-
-    /* --- Kosmos‑Kontinuum Punkte --- */
-    const Tokio = PE(orbitTokio());
-    const Corlu = PE(orbitCorlu());
-    const HH    = PE(orbitHH());
-
-    /* --- Dreieck zeichnen --- */
-    ctx.strokeStyle = "white";
+function drawOrbits() {
+    const t = state.orbits.tokio;
+    const r1 = Math.min(W, H) * 0.32;
+    ctx.strokeStyle = `rgba(255, 107, 107, ${0.1 + state.synValue * 0.2})`;
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([2, 8]);
     ctx.beginPath();
-    ctx.moveTo(450+Tokio.x, 450+Tokio.y);
-    ctx.lineTo(450+Corlu.x, 450+Corlu.y);
-    ctx.lineTo(450+HH.x,    450+HH.y);
-    ctx.closePath();
+    ctx.arc(cx + Math.cos(t) * r1 * 0.1, cy + Math.sin(t) * r1 * 0.1, r1 * 0.9, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = `rgba(255, 107, 107, ${0.3 + state.synValue * 0.3})`;
+    ctx.font = '7px Consolas';
+    ctx.textAlign = 'center';
+    ctx.fillText('2268', cx + Math.cos(t) * r1 * 0.85, cy + Math.sin(t) * r1 * 0.85);
 
-    /* --- Punkte --- */
-    ctx.fillStyle = "cyan";
-    ctx.fillRect(450+Tokio.x, 450+Tokio.y, 4, 4);
-    ctx.fillRect(450+Corlu.x, 450+Corlu.y, 4, 4);
-    ctx.fillRect(450+HH.x,    450+HH.y,    4, 4);
+    const r2 = Math.min(W, H) * 0.22;
+    ctx.strokeStyle = `rgba(107, 255, 107, ${0.1 + state.quantValue * 0.2})`;
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([2, 8]);
+    ctx.beginPath();
+    ctx.arc(cx + Math.cos(t * 1.3) * r2 * 0.1, cy + Math.sin(t * 1.3) * r2 * 0.1, r2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = `rgba(107, 255, 107, ${0.3 + state.quantValue * 0.3})`;
+    ctx.fillText('756', cx + Math.cos(t * 1.3) * r2 * 0.95, cy + Math.sin(t * 1.3) * r2 * 0.95);
 
-    requestAnimationFrame(loop);
+    const r3 = Math.min(W, H) * 0.12;
+    ctx.strokeStyle = `rgba(107, 107, 255, ${0.1 + state.respoValue * 0.2})`;
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([2, 8]);
+    ctx.beginPath();
+    ctx.arc(cx + Math.cos(t * 1.7) * r3 * 0.1, cy + Math.sin(t * 1.7) * r3 * 0.1, r3, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = `rgba(107, 107, 255, ${0.3 + state.respoValue * 0.3})`;
+    ctx.fillText('243', cx + Math.cos(t * 1.7) * r3 * 0.9, cy + Math.sin(t * 1.7) * r3 * 0.9);
 }
 
-loop();
+function drawSynNetwork() {
+    const strength = state.synValue;
+    const points = computeSyn(state.synAngle, strength);
+    state.synPoints = points;
 
+    ctx.strokeStyle = `rgba(255, 107, 107, ${0.3 + strength * 0.4})`;
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < points.length; i++) {
+        const p1 = points[i];
+        const p2 = points[(i + 1) % points.length];
+        ctx.beginPath();
+        ctx.moveTo(cx + p1.x, cy + p1.y);
+        ctx.lineTo(cx + p2.x, cy + p2.y);
+        ctx.stroke();
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+        ctx.fillStyle = `rgba(255, 107, 107, ${0.2 + strength * 0.3})`;
+        ctx.font = '7px Consolas';
+        ctx.textAlign = 'center';
+        ctx.fillText('90°', cx + midX, cy + midY - 10);
+    }
+    points.forEach(p => {
+        const glow = ctx.createRadialGradient(cx + p.x, cy + p.y, 0, cx + p.x, cy + p.y, 14);
+        glow.addColorStop(0, `rgba(255, 107, 107, ${0.8 + p.weight * 0.2})`);
+        glow.addColorStop(1, 'rgba(255, 107, 107, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(cx + p.x, cy + p.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(cx + p.x, cy + p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function drawQuantNetwork() {
+    const strength = state.quantValue;
+    const points = computeQuant(state.quantAngle, strength);
+    state.quantPoints = points;
+
+    ctx.strokeStyle = `rgba(107, 107, 255, ${0.3 + strength * 0.4})`;
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < points.length; i++) {
+        const p1 = points[i];
+        const p2 = points[(i + 1) % points.length];
+        ctx.beginPath();
+        ctx.moveTo(cx + p1.x, cy + p1.y);
+        ctx.lineTo(cx + p2.x, cy + p2.y);
+        ctx.stroke();
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
+        ctx.fillStyle = `rgba(107, 107, 255, ${0.2 + strength * 0.3})`;
+        ctx.font = '7px Consolas';
+        ctx.textAlign = 'center';
+        ctx.fillText('120°', cx + midX, cy + midY + 14);
+    }
+    points.forEach(p => {
+        const glow = ctx.createRadialGradient(cx + p.x, cy + p.y, 0, cx + p.x, cy + p.y, 16);
+        glow.addColorStop(0, `rgba(107, 107, 255, ${0.6 + p.weight * 0.3})`);
+        glow.addColorStop(1, 'rgba(107, 107, 255, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(cx + p.x, cy + p.y, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(cx + p.x, cy + p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function drawRespoCore() {
+    const val = state.respoValue;
+    const coreRadius = 10 + val * 35;
+
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius + 30);
+    glow.addColorStop(0, `rgba(255, 217, 61, ${0.3 + val * 0.5})`);
+    glow.addColorStop(0.5, `rgba(255, 217, 61, ${0.1 + val * 0.2})`);
+    glow.addColorStop(1, 'rgba(255, 217, 61, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, coreRadius + 30, 0, Math.PI * 2);
+    ctx.fill();
+
+    const coreGrad = ctx.createRadialGradient(cx - 3, cy - 3, 0, cx, cy, coreRadius);
+    coreGrad.addColorStop(0, `rgba(255, 217, 61, ${0.9 + val * 0.1})`);
+    coreGrad.addColorStop(0.7, `rgba(255, 200, 50, ${0.6 + val * 0.3})`);
+    coreGrad.addColorStop(1, `rgba(255, 180, 30, ${0.3 + val * 0.2})`);
+    ctx.fillStyle = coreGrad;
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 25 + val * 30;
+    ctx.beginPath();
+    ctx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = '#000';
+    ctx.font = `bold ${10 + val * 10}px Consolas`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('◈', cx, cy - 1);
+
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + val * 0.5})`;
+    ctx.font = '8px Consolas';
+    ctx.fillText(`φ = ${state.respoValue.toFixed(3)}`, cx, cy + coreRadius + 16);
+}
+
+function drawGarantieLine() {
+    const synP = state.synPoints;
+    const quantP = state.quantPoints;
+    if (synP.length > 0 && quantP.length > 0) {
+        const s = synP[0];
+        const q = quantP[0];
+        const garantie = state.garantie;
+        const color = garantie >= GARANTIE_SCHWELLE ? 'rgba(255, 215, 0, 0.4)' : 'rgba(255, 50, 50, 0.4)';
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1 + garantie * 2;
+        ctx.setLineDash([3, 5]);
+        ctx.beginPath();
+        ctx.moveTo(cx + s.x, cy + s.y);
+        ctx.lineTo(cx + q.x, cy + q.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = `rgba(255, 215, 0, ${0.3 + garantie * 0.5})`;
+        ctx.font = '7px Consolas';
+        ctx.textAlign = 'center';
+        const midX = (s.x + q.x) / 2;
+        const midY = (s.y + q.y) / 2;
+        ctx.fillText(`🛡 ${Math.round(garantie * 100)}%`, cx + midX, cy + midY - 16);
+    }
+}
+
+// ============================================================
+// 8. UPDATE — GARANTIE
+// ============================================================
+function updateContinuum() {
+    // RESPO mit Stabilitätsgewichtung
+    state.respoValue = computeRespo(
+        state.synValue,
+        state.quantValue,
+        state.synStability,
+        state.quantStability
+    );
+
+    // Garantie berechnen
+    state.garantie = computeGarantie(state.synStability, state.quantStability);
+    state.garantieErfuellt = state.garantie >= GARANTIE_SCHWELLE;
+
+    // Dynamik: SYN (letzte Version) ist volatiler
+    const synDrift = (1 - state.synStability) * 0.02;
+    state.synValue += (Math.random() - 0.5) * synDrift;
+
+    // QUANT (vorletzte Version) ist stabiler
+    const quantDrift = (1 - state.quantStability) * 0.008;
+    state.quantValue += (Math.random() - 0.5) * quantDrift;
+
+    state.synValue = Math.min(1, Math.max(0.05, state.synValue));
+    state.quantValue = Math.min(1, Math.max(0.05, state.quantValue));
+
+    // Garantie-Log
+    if (state.cycle % 20 === 0) {
+        const status = state.garantie >= GARANTIE_SCHWELLE ? '✅' : '❌';
+        log(`${status} Garantie: ${Math.round(state.garantie * 100)}% (SYN:${Math.round(state.synStability*100)}% QUANT:${Math.round(state.quantStability*100)}%)`, state.garantie >= GARANTIE_SCHWELLE ? 'ok' : 'err');
+    }
+}
+
+// ============================================================
+// 9. CONTROLS
+// ============================================================
+document.getElementById('btn-start').addEventListener('click', function() {
+    state.running = !state.running;
+    this.textContent = state.running ? '⏸ STOP' : '▶ START';
+    document.getElementById('state-display').textContent = state.running ? '● läuft' : '● gestoppt';
+    document.getElementById('state-display').style.color = state.running ? 'var(--gold)' : '#666';
+    log(state.running ? '▶ CONTINIUM gestartet' : '⏸ CONTINIUM gestoppt', state.running ? 'ok' : 'warn');
+});
+
+document.getElementById('btn-syn').addEventListener('click', function() {
+    state.synValue = Math.min(1, state.synValue + 0.1);
+    state.synStability = Math.min(1, state.synStability + 0.03);
+    updateContinuum();
+    log(`⟳ SYN auf ${state.synValue.toFixed(2)} verstärkt (Stab:${Math.round(state.synStability*100)}%)`, 'syn');
+});
+
+document.getElementById('btn-quant').addEventListener('click', function() {
+    state.quantValue = Math.min(1, state.quantValue + 0.1);
+    state.quantStability = Math.min(1, state.quantStability + 0.03);
+    updateContinuum();
+    log(`⚛ QUANT auf ${state.quantValue.toFixed(2)} verstärkt (Stab:${Math.round(state.quantStability*100)}%)`, 'quant');
+});
+
+document.getElementById('btn-respo').addEventListener('click', function() {
+    state.respoValue = computeRespo(state.synValue, state.quantValue, state.synStability, state.quantStability);
+    log(`◈ RESPO = ${state.respoValue.toFixed(3)}`, 'respo');
+});
+
+document.getElementById('btn-reset').addEventListener('click', function() {
+    state.running = false;
+    state.paused = false;
+    state.cycle = 0;
+    state.t = 0;
+    state.synValue = 0.5;
+    state.quantValue = 0.5;
+    state.respoValue = 0.5;
+    state.synStability = 0.87;
+    state.quantStability = 0.83;
+    state.garantie = 0.67;
+    state.synAngle = 0;
+    state.quantAngle = 0;
+    state.orbits = { tokio: 0, corlu: 0, hh: 0 };
+    document.getElementById('btn-start').textContent = '▶ START';
+    document.getElementById('state-display').textContent = '● reset';
+    document.getElementById('state-display').style.color = '#f44';
+    document.getElementById('cycle-display').textContent = 'Zyklus 0';
+    updateContinuum();
+    log('⟲ RESET — CONTINIUM zurückgesetzt', 'warn');
+});
+
+document.getElementById('btn-auto').addEventListener('click', function() {
+    state.autoMode = !state.autoMode;
+    this.textContent = state.autoMode ? '⏸ PAUSE' : '▶ AUTO';
+    if (state.autoMode) {
+        log('▶ AUTO-Modus — Garantie überwacht', 'warn');
+        state.running = true;
+        document.getElementById('btn-start').textContent = '⏸ STOP';
+        document.getElementById('state-display').textContent = '● auto';
+        document.getElementById('state-display').style.color = 'var(--gold)';
+        if (window.autoInterval) clearInterval(window.autoInterval);
+        window.autoInterval = setInterval(function() {
+            state.cycle++;
+            document.getElementById('cycle-display').textContent = 'Zyklus ' + state.cycle;
+
+            // SYN (letzte Version) oszilliert mehr
+            state.synValue = 0.3 + 0.6 * (0.5 + 0.5 * Math.sin(state.cycle * 0.4));
+            state.synStability = 0.7 + 0.2 * (0.5 + 0.5 * Math.sin(state.cycle * 0.15));
+
+            // QUANT (vorletzte Version) oszilliert weniger
+            state.quantValue = 0.3 + 0.6 * (0.5 + 0.5 * Math.cos(state.cycle * 0.25));
+            state.quantStability = 0.75 + 0.15 * (0.5 + 0.5 * Math.cos(state.cycle * 0.12));
+
+            updateContinuum();
+
+            const status = state.garantie >= GARANTIE_SCHWELLE ? '✅' : '❌';
+            log(`🔄 Zyklus ${state.cycle}: ${status} SYN=${state.synValue.toFixed(2)} QUANT=${state.quantValue.toFixed(2)} RESPO=${state.respoValue.toFixed(2)} GAR=${Math.round(state.garantie*100)}%`, state.garantie >= GARANTIE_SCHWELLE ? 'ok' : 'err');
+        }, 3000);
+    } else {
+        clearInterval(window.autoInterval);
+        log('⏸ AUTO-Modus pausiert', 'warn');
+        document.getElementById('state-display').textContent = '● pausiert';
+        document.getElementById('state-display').style.color = '#ff4';
+    }
+});
+
+// ============================================================
+// 10. TASTATUR
+// ============================================================
+document.addEventListener('keydown', function(e) {
+    if (e.key === ' ') { e.preventDefault(); document.getElementById('btn-start').click(); }
+    if (e.key === 's' || e.key === 'S') document.getElementById('btn-syn').click();
+    if (e.key === 'q' || e.key === 'Q') document.getElementById('btn-quant').click();
+    if (e.key === 'r' || e.key === 'R') document.getElementById('btn-respo').click();
+    if (e.key === 'x' || e.key === 'X') document.getElementById('btn-reset').click();
+    if (e.key === 'a' || e.key === 'A') document.getElementById('btn-auto').click();
+});
+
+// ============================================================
+// 11. UHR
+// ============================================================
+function updateClock() {
+    document.getElementById('clock').textContent = '⏱️ ' + new Date().toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+// 12. INIT
+// ============================================================
+log('◈ CONTINIUM · LETZTE vs. VORLETZTE · 67% Garantie', 'respo');
+log('⟳ SYN = Letzte Version (experimentell, 87%)', 'syn');
+log('⚛ QUANT = Vorletzte Version (stabil, 83%)', 'quant');
+log(`🛡 Garantie-Schwelle: ${Math.round(GARANTIE_SCHWELLE * 100)}%`, 'ok');
+log('⌨️  space=Start  s=SYN  q=QUANT  r=RESPO  x=Reset  a=Auto', 'ok');
+
+console.log('◈ CONTINIUM · LETZTE vs. VORLETZTE · 67% Garantie');
+console.log('⟳ SYN = Letzte Version (experimentell)');
+console.log('⚛ QUANT = Vorletzte Version (stabil)');
+console.log(`🛡 Garantie-Schwelle: ${Math.round(GARANTIE_SCHWELLE * 100)}%`);
+console.log('⌨️  space=Start  s=SYN  q=QUANT  r=RESPO  x=Reset  a=Auto');
+
+// Initial
+updateContinuum();
+
+// Automatisch starten
+setTimeout(function() {
+    state.running = true;
+    document.getElementById('btn-start').textContent = '⏸ STOP';
+    document.getElementById('state-display').textContent = '● läuft';
+    document.getElementById('state-display').style.color = 'var(--gold)';
+    log('▶ CONTINIUM automatisch gestartet', 'ok');
+}, 500);
 </script>
 </body>
 </html>
